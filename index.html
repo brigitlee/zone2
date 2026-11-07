@@ -337,6 +337,7 @@ select { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px;
     applyVol();
     for (const k of ["wood", "beep", "stick"]) clickBufs[k] = makeClick(k);
     chimeBuf = makeChime();
+    watchState();
     return ctx;
   }
   function applyVol() {
@@ -384,6 +385,12 @@ select { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px;
     voiceBufs[key] = await new Promise((res, rej) => ctx.decodeAudioData(bytes.buffer, res, rej));
     return voiceBufs[key];
   }
+  function makeBeat(click, bpm) {
+    const sr = ctx.sampleRate, n = Math.round(sr * 60 / bpm);
+    const buf = ctx.createBuffer(1, n, sr), src = click.getChannelData(0);
+    buf.getChannelData(0).set(src.length > n ? src.subarray(0, n) : src);
+    return buf;
+  }
   function play(buf, when, dest, list) {
     const s = ctx.createBufferSource(); s.buffer = buf; s.connect(dest); s.start(when);
     if (list) list.push(s);
@@ -411,9 +418,12 @@ select { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px;
     const now = ctx.currentTime + 0.15, t0 = now + LEAD;
     const sources = [];
     if (startV) play(startV, now, vBus, sources);
-    const beatDur = 60 / bpm, nBeats = Math.floor(total / beatDur);
-    const click = clickBufs[cfg.sound];
-    for (let i = 0; i < nBeats; i++) play(click, t0 + i * beatDur, clickBus, sources);
+    // one beat of sound (click + silence), looped: a single source for the whole run
+    const beatBuf = makeBeat(clickBufs[cfg.sound], bpm);
+    const loop = ctx.createBufferSource();
+    loop.buffer = beatBuf; loop.loop = true; loop.connect(clickBus);
+    loop.start(t0); loop.stop(t0 + total);
+    sources.push(loop);
     duck.gain.setValueAtTime(1, now);
     marks.forEach((m, i) => {
       const buf = markV[i]; if (!buf) return;
@@ -430,9 +440,29 @@ select { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px;
 
     run = { t0, total, bpm, interval, sources, bus, endAt, finishAt: endAt + 2.4 + (endV ? endV.duration : 0) + .3 };
     setState("running");
-    startKeepAlive();
     if (cfg.wake) requestWake();
-    mediaSession();
+    startWatch();
+  }
+
+  // ---------- watch for audio that stops on its own ----------
+  let selfSuspend = false, watchTimer = null, lastWall = 0, lastAudio = 0;
+  function startWatch() {
+    clearInterval(watchTimer);
+    lastWall = performance.now(); lastAudio = ctx.currentTime;
+    watchTimer = setInterval(() => {
+      if (state !== "running" || document.visibilityState !== "visible") { lastWall = performance.now(); lastAudio = ctx.currentTime; return; }
+      const wall = (performance.now() - lastWall) / 1000, audio = ctx.currentTime - lastAudio;
+      if (wall > 2.5 && audio < wall * 0.5)
+        report("音訊卡住：過了 " + wall.toFixed(1) + " 秒，音訊時間只前進 " + audio.toFixed(1) + " 秒（狀態 " + ctx.state + "，取樣率 " + ctx.sampleRate + "）。請把這行字截圖給 Claude。");
+      lastWall = performance.now(); lastAudio = ctx.currentTime;
+    }, 3000);
+  }
+  function stopWatch() { clearInterval(watchTimer); watchTimer = null; }
+  function watchState() {
+    ctx.onstatechange = () => {
+      if (!selfSuspend && run && state === "running" && ctx.state !== "running")
+        report("系統暫停了音訊（狀態 " + ctx.state + "），不是按鈕造成的。請把這行字截圖給 Claude。");
+    };
   }
 
   function teardown() {
@@ -442,12 +472,12 @@ select { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px;
     clickVolG.disconnect(); voiceVolG.disconnect();
     clickVolG.connect(ctx.destination); voiceVolG.connect(ctx.destination);
     run = null;
-    stopKeepAlive(); releaseWake();
+    stopWatch(); releaseWake();
   }
 
   async function togglePause() {
-    if (state === "running") { await ctx.suspend(); setState("paused"); keepAlive && keepAlive.pause(); }
-    else if (state === "paused") { await ctx.resume(); setState("running"); keepAlive && keepAlive.play().catch(() => {}); }
+    if (state === "running") { selfSuspend = true; await ctx.suspend(); selfSuspend = false; setState("paused"); }
+    else if (state === "paused") { await ctx.resume(); setState("running"); startWatch(); }
   }
 
   function report(msg) { const h = $("hint"); h.textContent = msg; h.hidden = !msg; }
@@ -488,32 +518,6 @@ select { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px;
     $("steps").textContent = "0";
   }
 
-  // keep the tab registered as media playback so Chrome keeps it alive with the screen off
-  function silentWav() {
-    const sr = 8000, n = sr / 2, b = new Uint8Array(44 + n), v = new DataView(b.buffer);
-    const w = (o, s) => [...s].forEach((c, i) => b[o + i] = c.charCodeAt(0));
-    w(0, "RIFF"); v.setUint32(4, 36 + n, true); w(8, "WAVEfmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
-    v.setUint32(24, sr, true); v.setUint32(28, sr, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); w(36, "data"); v.setUint32(40, n, true);
-    b.fill(128, 44);
-    let s = ""; b.forEach(x => s += String.fromCharCode(x));
-    return "data:audio/wav;base64," + btoa(s);
-  }
-  function startKeepAlive() {
-    try {
-      if (!keepAlive) { keepAlive = new Audio(silentWav()); keepAlive.loop = true; }
-      keepAlive.play().catch(() => {});
-    } catch (e) {}
-  }
-  function stopKeepAlive() { try { keepAlive && keepAlive.pause(); } catch (e) {} }
-  function mediaSession() {
-    if (!("mediaSession" in navigator)) return;
-    try {
-      navigator.mediaSession.metadata = new MediaMetadata({ title: "超慢跑快樂 Zone2", artist: cfg.bpm + " BPM · " + cfg.total + " 分鐘" });
-      navigator.mediaSession.setActionHandler("play", () => { if (state === "paused") togglePause(); });
-      navigator.mediaSession.setActionHandler("pause", () => { if (state === "running") togglePause(); });
-      navigator.mediaSession.setActionHandler("stop", () => $("stop").click());
-    } catch (e) {}
-  }
   async function requestWake() { try { wakeLock = await navigator.wakeLock.request("screen"); } catch (e) { wakeLock = null; } }
   function releaseWake() { try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null; }
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && cfg.wake && state === "running") requestWake(); });

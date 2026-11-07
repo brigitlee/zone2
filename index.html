@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f2c8bd">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)} body{margin:0} [hidden]{display:none!important}</style>
+</head>
+<body>
+<title>超慢跑快樂Zone2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Josefin+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: a single poster (pink ground, blue type on the edges, blob-cut "photo" of a cat clock on 80s wood paneling), then a control sheet below. Deliberately single-theme: the poster look is fixed. */
+:root {
+  --pink: #f2c8bd;
+  --pink-deep: #e9b0a3;
+  --paper: #fbe7e1;
+  --blue: #2f78cf;
+  --navy: #1d4f8f;
+  --ink: #2b2523;
+  --muted: #7a5f58;
+  --white: #fffaf8;
+  --display: "Noto Sans TC", "PingFang TC", "Heiti TC", sans-serif;
+  --latin: "Josefin Sans", "Futura", "Avenir Next", sans-serif;
+  color-scheme: light;
+}
+html, body { min-height: 100%; }
+body {
+  background: var(--pink);
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 15px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 40px;
+}
+.wrap { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+
+/* ---------- poster ---------- */
+.poster { position: relative; width: 100%; aspect-ratio: 3 / 4.15; max-width: 100%; }
+.scene { position: absolute; left: 9%; top: 15%; width: 78%; height: auto; overflow: visible; }
+.big { position: absolute; color: var(--blue); font-weight: 900; line-height: .98; margin: 0; letter-spacing: 0; }
+.big { font-size: clamp(58px, 19vw, 92px); transform-origin: 50% 60%; }
+.c-chao { left: 11%; top: -1%; transform: rotate(7deg); }
+.c-man  { left: -2%; top: 14.5%; transform: rotate(-8deg); font-size: clamp(54px, 17.5vw, 86px); }
+.c-pao  { left: -4%; top: 34%; transform: rotate(4deg); font-size: clamp(62px, 20.5vw, 98px); }
+.c-kuai { left: 2%;  bottom: 4%; transform: rotate(-9deg); font-size: clamp(50px, 16vw, 78px); }
+.c-le   { left: 21%; bottom: -1%; transform: rotate(6deg); font-size: clamp(56px, 18vw, 86px); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.t-zone { position: absolute; right: 0; bottom: 1%; font-family: var(--latin); font-weight: 700; color: var(--navy); font-size: clamp(40px, 13vw, 64px); line-height: 1; letter-spacing: -.01em; margin: 0; }
+.t-zone sup { font-size: .5em; vertical-align: .9em; }
+.side-latin { position: absolute; right: -1%; top: 1%; writing-mode: vertical-rl; font-family: var(--latin); font-weight: 600; letter-spacing: .28em; color: var(--blue); font-size: clamp(15px, 4.6vw, 22px); }
+.vert-left { position: absolute; right: 1%; top: 47%; writing-mode: vertical-rl; font-family: var(--latin); font-weight: 600; letter-spacing: .3em; font-size: clamp(11px, 3.2vw, 14px); color: var(--navy); }
+.dateline { position: absolute; right: 13%; top: 1.5%; text-align: right; font-family: var(--latin); font-weight: 600; color: var(--ink); font-size: clamp(12px, 3.6vw, 16px); line-height: 1.5; font-variant-numeric: tabular-nums; }
+.dateline small { font-family: var(--display); font-weight: 700; font-size: .85em; }
+.hill { position: absolute; }
+
+/* ---------- control sheet ---------- */
+.panel { background: var(--paper); border-radius: 28px 28px 28px 6px; padding: 20px 18px 22px; display: flex; flex-direction: column; gap: 18px; }
+.readout { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 6px 12px; }
+.remain { font-family: var(--latin); font-weight: 700; color: var(--blue); font-size: clamp(56px, 18vw, 84px); line-height: .9; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.state { font-weight: 700; font-size: 13px; color: var(--white); background: var(--navy); padding: 4px 10px; border-radius: 999px; justify-self: end; }
+.state[data-s="running"] { background: var(--blue); }
+.state[data-s="done"] { background: #c4573f; }
+.stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat { border-top: 2px solid var(--blue); padding-top: 6px; min-width: 0; }
+.stat b { display: block; height: 30px; line-height: 30px; overflow: hidden; white-space: nowrap; font-family: var(--latin); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+.stat b small { font-family: var(--display); font-size: 15px; font-weight: 700; margin-left: 2px; }
+.stat span { display: block; height: 18px; line-height: 18px; font-size: 12px; color: var(--muted); }
+.actions { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+button { font: inherit; cursor: pointer; border: 0; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+.go { background: var(--blue); color: var(--white); font-weight: 900; font-size: 22px; border-radius: 999px; padding: 16px 10px; letter-spacing: .1em; }
+.go:active { background: var(--navy); }
+.stop { background: transparent; color: var(--navy); border: 2px solid var(--navy); font-weight: 700; border-radius: 999px; font-size: 17px; }
+.stop:disabled { opacity: .35; cursor: default; }
+
+fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+fieldset:disabled { opacity: .55; }
+h2 { margin: 0; font-size: 15px; font-weight: 900; color: var(--navy); letter-spacing: .08em; display: flex; align-items: center; gap: 10px; }
+h2::after { content: ""; flex: 1; height: 2px; background: var(--pink-deep); }
+.row { display: grid; grid-template-columns: 6.5em 1fr; align-items: center; gap: 10px; }
+.row label, .row .lbl { font-weight: 700; font-size: 14px; }
+.stepper { display: flex; align-items: center; gap: 8px; }
+.stepper button { width: 40px; height: 40px; border-radius: 50%; background: var(--white); color: var(--blue); font-size: 22px; font-weight: 700; border: 2px solid var(--blue); line-height: 1; }
+.stepper output { min-width: 3.6em; text-align: center; font-family: var(--latin); font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; }
+.stepper small { font-size: 13px; color: var(--muted); }
+input[type=range] { width: 100%; accent-color: var(--blue); }
+select { font: inherit; font-size: 15px; padding: 8px 10px; border-radius: 10px; border: 2px solid var(--pink-deep); background: var(--white); color: var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { background: var(--white); color: var(--navy); border: 2px solid var(--blue); border-radius: 999px; padding: 8px 14px; font-weight: 700; font-size: 14px; }
+.chip:active { background: var(--blue); color: var(--white); }
+.check { display: flex; gap: 10px; align-items: center; font-size: 14px; font-weight: 700; }
+.check input { width: 20px; height: 20px; accent-color: var(--blue); }
+.note { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 0; }
+@media (prefers-reduced-motion: reduce) { .go { transition: none; } }
+</style>
+
+<div class="wrap">
+  <section class="poster" aria-label="超慢跑快樂 Zone2">
+    <!-- hills behind the photo (from the poster references) -->
+    <svg class="hill" style="left:-4%; top:60%; width:46%;" viewBox="0 0 200 100" aria-hidden="true"><path d="M0 100 C 20 30, 70 0, 110 10 C 150 20, 175 60, 200 100 Z" fill="#2f78cf"/></svg>
+    <svg class="hill" style="right:6%; top:10%; width:24%;" viewBox="0 0 120 50" aria-hidden="true"><path d="M0 50 C 25 10, 40 6, 60 22 C 75 4, 95 6, 120 50 Z" fill="#e48aa6"/></svg>
+
+    <svg class="scene" viewBox="0 0 300 360" role="img" aria-label="木板牆上的黑貓時鐘，尾巴隨節拍擺動">
+      <defs>
+        <clipPath id="blob">
+          <path d="M30 42 C62 12 118 30 160 18 C212 4 270 18 281 62 C293 112 268 142 284 192 C299 244 281 302 250 331 C219 358 160 341 120 351 C70 362 18 342 14 290 C10 240 36 212 21 162 C6 112 4 70 30 42 Z"/>
+        </clipPath>
+        <linearGradient id="plankA" x1="0" x2="1">
+          <stop offset="0" stop-color="#6b3f22"/><stop offset=".45" stop-color="#8a5530"/><stop offset="1" stop-color="#6e4224"/>
+        </linearGradient>
+        <linearGradient id="plankB" x1="0" x2="1">
+          <stop offset="0" stop-color="#7a4a28"/><stop offset=".55" stop-color="#9a6238"/><stop offset="1" stop-color="#7b4b29"/>
+        </linearGradient>
+        <filter id="grain" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.035 0.6" numOctaves="3" seed="7"/>
+          <feColorMatrix values="0 0 0 0 0.18  0 0 0 0 0.09  0 0 0 0 0.03  0 0 0 1.4 -0.45"/>
+        </filter>
+        <radialGradient id="lamp" cx=".15" cy=".05" r=".9">
+          <stop offset="0" stop-color="#ffd9a0" stop-opacity=".55"/>
+          <stop offset=".5" stop-color="#ffb870" stop-opacity=".12"/>
+          <stop offset="1" stop-color="#2a1205" stop-opacity=".35"/>
+        </radialGradient>
+        <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="7" dy="9" stdDeviation="4" flood-color="#1c0b02" flood-opacity=".55"/>
+        </filter>
+        <radialGradient id="eyeShade" cx=".45" cy=".35" r=".7">
+          <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e4e0da"/>
+        </radialGradient>
+      </defs>
+
+      <g clip-path="url(#blob)">
+        <!-- wood paneling: planks + grooves + grain -->
+        <g id="planks"></g>
+        <rect width="300" height="360" filter="url(#grain)" opacity=".9"/>
+        <!-- chair rail and lower panel -->
+        <rect x="0" y="318" width="300" height="9" fill="#5a3218"/>
+        <rect x="0" y="318" width="300" height="2" fill="#a26a40"/>
+        <rect x="0" y="327" width="300" height="40" fill="#4b2913" opacity=".55"/>
+        <!-- framed photo corner, top-left -->
+        <g filter="url(#shadow)">
+          <rect x="-20" y="34" width="66" height="84" fill="#c9a24c"/>
+          <rect x="-12" y="42" width="50" height="68" fill="#7fa4b8"/>
+          <path d="M-12 96 L8 74 L22 88 L30 80 L38 90 L38 110 L-12 110 Z" fill="#4e7a52"/>
+          <circle cx="24" cy="56" r="6" fill="#f3d27a"/>
+        </g>
+        <!-- light switch plate, right -->
+        <g filter="url(#shadow)">
+          <rect x="238" y="232" width="24" height="38" rx="3" fill="#efe4cf"/>
+          <rect x="247" y="244" width="6" height="13" rx="1.5" fill="#d8c9ad"/>
+          <circle cx="250" cy="237" r="1.3" fill="#b9a988"/><circle cx="250" cy="265" r="1.3" fill="#b9a988"/>
+        </g>
+
+        <!-- the cat clock -->
+        <g id="clock" filter="url(#shadow)">
+          <!-- tail: rotates around the base of the body -->
+          <g id="tail">
+            <path d="M146 244 C 144 280, 147 305, 141 332 C 138 346, 147 352, 155 343 C 160 336, 156 312, 156 290 C 156 272, 155 258, 154 244 Z" fill="#141212"/>
+          </g>
+          <!-- arms -->
+          <rect x="112" y="150" width="15" height="70" rx="7.5" fill="#141212"/>
+          <rect x="173" y="150" width="15" height="70" rx="7.5" fill="#141212"/>
+          <ellipse cx="119.5" cy="218" rx="10" ry="7.5" fill="#f7f4ee"/>
+          <ellipse cx="180.5" cy="218" rx="10" ry="7.5" fill="#f7f4ee"/>
+          <path d="M114 218 v4 M119.5 219 v4 M125 218 v4 M175 218 v4 M180.5 219 v4 M186 218 v4" stroke="#9a948a" stroke-width="1"/>
+          <!-- body -->
+          <path d="M126 140 H174 C178 140 180 143 180 147 V232 C180 244 168 252 150 252 C132 252 120 244 120 232 V147 C120 143 122 140 126 140 Z" fill="#141212"/>
+          <!-- clock face -->
+          <circle cx="150" cy="190" r="25" fill="#f7f4ee" stroke="#c9c3b8" stroke-width="1.5"/>
+          <g id="ticks" fill="#141212" font-family="Josefin Sans, Futura, sans-serif" font-weight="700" font-size="7" text-anchor="middle"></g>
+          <text x="150" y="203" font-family="Georgia, serif" font-style="italic" font-size="4.6" fill="#141212" text-anchor="middle">Kit-Cat</text>
+          <line id="hourHand" x1="150" y1="190" x2="150" y2="177" stroke="#141212" stroke-width="2.6" stroke-linecap="round"/>
+          <line id="minHand" x1="150" y1="190" x2="150" y2="171" stroke="#141212" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="150" cy="190" r="2" fill="#141212"/>
+          <!-- head -->
+          <path d="M108 62 L114 26 L134 50 Q150 44 166 50 L186 26 L192 62 Q198 80 192 104 Q184 132 150 136 Q116 132 108 104 Q102 80 108 62 Z" fill="#141212"/>
+          <path d="M115 34 L130 51 L117 55 Z M185 34 L170 51 L183 55 Z" fill="#3a3330"/>
+          <!-- eyes -->
+          <ellipse cx="134" cy="84" rx="13" ry="16" fill="url(#eyeShade)"/>
+          <ellipse cx="166" cy="84" rx="13" ry="16" fill="url(#eyeShade)"/>
+          <g id="pupils" fill="#141212">
+            <ellipse cx="134" cy="86" rx="5.2" ry="10"/>
+            <ellipse cx="166" cy="86" rx="5.2" ry="10"/>
+          </g>
+          <path d="M120 70 Q134 62 148 70 M152 70 Q166 62 180 70" stroke="#141212" stroke-width="3" fill="none"/>
+          <!-- muzzle -->
+          <path d="M127 112 Q150 96 173 112 Q170 126 150 128 Q130 126 127 112 Z" fill="#f7f4ee"/>
+          <path d="M145 106 L155 106 L150 112 Z" fill="#141212"/>
+          <path d="M136 117 Q143 124 150 116 Q157 124 164 117" stroke="#141212" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+          <path d="M130 112 L104 106 M130 116 L102 117 M170 112 L196 106 M170 116 L198 117" stroke="#f7f4ee" stroke-width="1.1" stroke-linecap="round"/>
+          <!-- bow tie -->
+          <path d="M150 140 L132 131 Q128 140 132 149 Z M150 140 L168 131 Q172 140 168 149 Z" fill="#f7f4ee"/>
+          <circle cx="150" cy="140" r="4" fill="#f7f4ee" stroke="#c9c3b8" stroke-width=".8"/>
+        </g>
+
+        <!-- warm lamp light over everything -->
+        <rect width="300" height="360" fill="url(#lamp)"/>
+      </g>
+    </svg>
+
+    <h1 class="sr">超慢跑快樂 Zone2</h1>
+    <span class="big c-chao" aria-hidden="true">超</span>
+    <span class="big c-man" aria-hidden="true">慢</span>
+    <span class="big c-pao" aria-hidden="true">跑</span>
+    <span class="big c-kuai" aria-hidden="true">快</span>
+    <span class="big c-le" aria-hidden="true">樂</span>
+    <p class="t-zone">Zone<sup>2</sup></p>
+    <div class="side-latin" aria-hidden="true">SLOW JOGGING</div>
+    <div class="dateline"><span id="today">2026.11.07</span><br><span id="lineBpm">180</span> BPM ▸ <span id="lineMin">30</span> MIN<br><small>每 <span id="lineInt">5</span> 分鐘提醒</small></div>
+    <div class="vert-left" aria-hidden="true">NOSE BREATHING</div>
+  </section>
+
+  <section class="panel" aria-label="計時與控制">
+    <div class="readout">
+      <div class="remain" id="remain" aria-live="off">30:00</div>
+      <div class="state" id="state" data-s="idle">準備</div>
+      <div class="stats">
+        <div class="stat"><b id="elapsed">0:00</b><span>已跑時間</span></div>
+        <div class="stat"><b id="next">5 分</b><span>下一次提示</span></div>
+        <div class="stat"><b id="steps">0</b><span>步數（拍）</span></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="go" id="go" type="button">開始</button>
+      <button class="stop" id="stop" type="button" disabled>結束</button>
+    </div>
+    <p class="note" id="hint" hidden></p>
+  </section>
+
+  <section class="panel" aria-label="設定">
+    <fieldset id="settings">
+      <h2>時間</h2>
+      <div class="row">
+        <span class="lbl" id="lblTotal">總時長</span>
+        <div class="stepper" role="group" aria-labelledby="lblTotal">
+          <button type="button" id="totalMinus" aria-label="減少 5 分鐘">−</button>
+          <output id="totalOut">30</output><small>分鐘</small>
+          <button type="button" id="totalPlus" aria-label="增加 5 分鐘">+</button>
+        </div>
+      </div>
+      <div class="row">
+        <span class="lbl" id="lblInt">提醒間隔</span>
+        <div class="stepper" role="group" aria-labelledby="lblInt">
+          <button type="button" id="intMinus" aria-label="減少 1 分鐘">−</button>
+          <output id="intOut">5</output><small id="intUnit">分鐘</small>
+          <button type="button" id="intPlus" aria-label="增加 1 分鐘">+</button>
+        </div>
+      </div>
+
+      <h2>節拍</h2>
+      <div class="row">
+        <label for="bpm">BPM <span id="bpmOut">180</span></label>
+        <input type="range" id="bpm" min="150" max="200" step="1" value="180">
+      </div>
+      <div class="row">
+        <label for="sound">音色</label>
+        <select id="sound">
+          <option value="wood">木魚聲</option>
+          <option value="beep">電子嗶聲</option>
+          <option value="stick">鼓棒聲</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="clickVol">節拍音量</label>
+        <input type="range" id="clickVol" min="0" max="100" value="80">
+      </div>
+      <div class="row">
+        <label for="voiceVol">人聲音量</label>
+        <input type="range" id="voiceVol" min="0" max="100" value="100">
+      </div>
+      <label class="check"><input type="checkbox" id="wake"> 跑步時讓螢幕保持亮著</label>
+    </fieldset>
+
+    <h2>試聽</h2>
+    <div class="chips">
+      <button class="chip" type="button" id="pvClick">節拍 4 拍</button>
+      <button class="chip" type="button" id="pvVoice">提醒人聲</button>
+      <button class="chip" type="button" id="pvEnd">結束音效</button>
+      <button class="chip" type="button" id="pvStart">開始人聲</button>
+    </div>
+    <p class="note">提醒人聲會唸出目前間隔的第一次提示，例如間隔 5 分鐘時唸 “5 minutes”。設定會記在這支手機的瀏覽器裡。</p>
+  </section>
+</div>
+
+<script src="voices.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const MAX_TOTAL = 90;
+  const LEAD = 1.0;            // seconds between "Let's go" and the first beat
+
+  // ---------- settings ----------
+  const defaults = { total: 30, interval: 5, bpm: 180, sound: "wood", clickVol: 80, voiceVol: 100, wake: false };
+  let cfg = { ...defaults };
+  try { Object.assign(cfg, JSON.parse(localStorage.getItem("zone2cfg") || "{}")); } catch (e) {}
+  const save = () => { try { localStorage.setItem("zone2cfg", JSON.stringify(cfg)); } catch (e) {} };
+
+  function renderCfg() {
+    $("totalOut").textContent = cfg.total;
+    $("intOut").textContent = cfg.interval === 0 ? "關" : cfg.interval;
+    $("intUnit").textContent = cfg.interval === 0 ? "" : "分鐘";
+    $("bpm").value = cfg.bpm; $("bpmOut").textContent = cfg.bpm;
+    $("sound").value = cfg.sound;
+    $("clickVol").value = cfg.clickVol; $("voiceVol").value = cfg.voiceVol;
+    $("wake").checked = cfg.wake;
+    $("lineBpm").textContent = cfg.bpm; $("lineMin").textContent = cfg.total;
+    $("lineInt").textContent = cfg.interval || "—";
+    if (state === "idle" || state === "done") showIdle();
+  }
+  $("totalMinus").onclick = () => { cfg.total = Math.max(5, cfg.total - 5); if (cfg.interval > cfg.total) cfg.interval = cfg.total; save(); renderCfg(); };
+  $("totalPlus").onclick  = () => { cfg.total = Math.min(MAX_TOTAL, cfg.total + 5); save(); renderCfg(); };
+  $("intMinus").onclick   = () => { cfg.interval = Math.max(0, cfg.interval - 1); save(); renderCfg(); };
+  $("intPlus").onclick    = () => { cfg.interval = Math.min(cfg.total, cfg.interval + 1); save(); renderCfg(); };
+  $("bpm").oninput = e => { cfg.bpm = +e.target.value; save(); renderCfg(); };
+  $("sound").onchange = e => { cfg.sound = e.target.value; save(); };
+  $("clickVol").oninput = e => { cfg.clickVol = +e.target.value; save(); applyVol(); };
+  $("voiceVol").oninput = e => { cfg.voiceVol = +e.target.value; save(); applyVol(); };
+  $("wake").onchange = e => { cfg.wake = e.target.checked; save(); };
+
+  // ---------- audio ----------
+  let ctx = null, clickVolG, voiceVolG;
+  const clickBufs = {}, voiceBufs = {};
+  let chimeBuf = null;
+
+  function ensureCtx() {
+    if (ctx) return ctx;
+    ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: "playback" });
+    clickVolG = ctx.createGain(); voiceVolG = ctx.createGain();
+    clickVolG.connect(ctx.destination); voiceVolG.connect(ctx.destination);
+    applyVol();
+    for (const k of ["wood", "beep", "stick"]) clickBufs[k] = makeClick(k);
+    chimeBuf = makeChime();
+    return ctx;
+  }
+  function applyVol() {
+    if (!ctx) return;
+    clickVolG.gain.value = (cfg.clickVol / 100) ** 1.5;
+    voiceVolG.gain.value = (cfg.voiceVol / 100) ** 1.2 * 1.4;
+  }
+  function makeClick(kind) {
+    const sr = ctx.sampleRate, n = Math.floor(sr * 0.07);
+    const buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
+    let prev = 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / sr, r = Math.random() * 2 - 1;
+      let v;
+      if (kind === "wood") v = Math.sin(2 * Math.PI * 830 * t) * Math.exp(-t * 55) + .45 * Math.sin(2 * Math.PI * 1720 * t) * Math.exp(-t * 90) + .35 * r * Math.exp(-t * 500);
+      else if (kind === "beep") v = Math.sin(2 * Math.PI * 1760 * t) * Math.min(1, t / .002) * Math.exp(-t * 45);
+      else { const hp = r - prev; prev = r; v = .7 * hp * Math.exp(-t * 160) + .5 * Math.sin(2 * Math.PI * 2500 * t) * Math.exp(-t * 130); }
+      d[i] = v;
+    }
+    normalize(d, .9);
+    return buf;
+  }
+  function makeChime() {
+    const sr = ctx.sampleRate, len = 4.2, n = Math.floor(sr * len);
+    const buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0);
+    const notes = [[784, 0], [988, .32], [1175, .64], [1568, .96], [1175, 1.6], [1568, 1.76]];
+    for (const [f, at] of notes) {
+      const s0 = Math.floor(at * sr);
+      for (let i = s0; i < n; i++) {
+        const t = (i - s0) / sr;
+        d[i] += Math.min(1, t / .004) * (Math.sin(2 * Math.PI * f * t) * Math.exp(-t * 2.2) + .35 * Math.sin(2 * Math.PI * f * 2.76 * t) * Math.exp(-t * 5) + .12 * Math.sin(2 * Math.PI * f * 5.4 * t) * Math.exp(-t * 9));
+      }
+    }
+    normalize(d, .8);
+    return buf;
+  }
+  function normalize(d, peak) { let m = 0; for (const x of d) m = Math.max(m, Math.abs(x)); if (m) for (let i = 0; i < d.length; i++) d[i] *= peak / m; }
+
+  async function voice(key) {
+    if (voiceBufs[key]) return voiceBufs[key];
+    const url = (typeof VOICES !== "undefined" ? VOICES : {})[key];
+    if (!url) return null;
+    const bin = atob(url.split(",")[1]), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    voiceBufs[key] = await new Promise((res, rej) => ctx.decodeAudioData(bytes.buffer, res, rej));
+    return voiceBufs[key];
+  }
+  function play(buf, when, dest, list) {
+    const s = ctx.createBufferSource(); s.buffer = buf; s.connect(dest); s.start(when);
+    if (list) list.push(s);
+    return s;
+  }
+
+  // ---------- run ----------
+  let state = "idle";          // idle | running | paused | done
+  let run = null;              // { t0, total, bpm, interval, sources, bus, duck, endAt }
+  let keepAlive = null, wakeLock = null;
+
+  async function start() {
+    ensureCtx();
+    if (ctx.state === "suspended") await ctx.resume();
+    const total = cfg.total * 60, bpm = cfg.bpm, interval = cfg.interval;
+    const marks = [];
+    if (interval > 0) for (let m = interval; m < cfg.total; m += interval) marks.push(m);
+    const [startV, endV, ...markV] = await Promise.all([voice("start"), voice("end"), ...marks.map(m => voice("v" + m))]);
+
+    const bus = ctx.createGain(); bus.connect(ctx.destination);
+    const clickBus = ctx.createGain(), duck = ctx.createGain(), vBus = ctx.createGain();
+    clickBus.connect(duck); duck.connect(clickVolG); vBus.connect(voiceVolG);
+    clickVolG.disconnect(); voiceVolG.disconnect(); clickVolG.connect(bus); voiceVolG.connect(bus);
+
+    const now = ctx.currentTime + 0.15, t0 = now + LEAD;
+    const sources = [];
+    if (startV) play(startV, now, vBus, sources);
+    const beatDur = 60 / bpm, nBeats = Math.floor(total / beatDur);
+    const click = clickBufs[cfg.sound];
+    for (let i = 0; i < nBeats; i++) play(click, t0 + i * beatDur, clickBus, sources);
+    duck.gain.setValueAtTime(1, now);
+    marks.forEach((m, i) => {
+      const buf = markV[i]; if (!buf) return;
+      const at = t0 + m * 60;
+      play(buf, at, vBus, sources);
+      duck.gain.setValueAtTime(1, at - .08);
+      duck.gain.linearRampToValueAtTime(.3, at);
+      duck.gain.setValueAtTime(.3, at + buf.duration);
+      duck.gain.linearRampToValueAtTime(1, at + buf.duration + .25);
+    });
+    const endAt = t0 + total;
+    play(chimeBuf, endAt, vBus, sources);
+    if (endV) play(endV, endAt + 2.4, vBus, sources);
+
+    run = { t0, total, bpm, interval, sources, bus, endAt, finishAt: endAt + 2.4 + (endV ? endV.duration : 0) + .3 };
+    setState("running");
+    startKeepAlive();
+    if (cfg.wake) requestWake();
+    mediaSession();
+  }
+
+  function teardown() {
+    if (!run) return;
+    for (const s of run.sources) { try { s.stop(); } catch (e) {} }
+    try { run.bus.disconnect(); } catch (e) {}
+    clickVolG.disconnect(); voiceVolG.disconnect();
+    clickVolG.connect(ctx.destination); voiceVolG.connect(ctx.destination);
+    run = null;
+    stopKeepAlive(); releaseWake();
+  }
+
+  async function togglePause() {
+    if (state === "running") { await ctx.suspend(); setState("paused"); keepAlive && keepAlive.pause(); }
+    else if (state === "paused") { await ctx.resume(); setState("running"); keepAlive && keepAlive.play().catch(() => {}); }
+  }
+
+  function report(msg) { const h = $("hint"); h.textContent = msg; h.hidden = !msg; }
+  $("go").onclick = async () => {
+    report("");
+    try {
+      if (state === "idle" || state === "done") { teardown(); await start(); }
+      else await togglePause();
+      setTimeout(() => {
+        if (ctx && state === "running" && ctx.state !== "running")
+          report("聲音沒有啟動：瀏覽器把音訊停在「" + ctx.state + "」狀態，所以計時也不會前進。請把這行字截圖給 Claude。");
+      }, 1500);
+    } catch (e) {
+      report("啟動失敗：" + (e && e.message ? e.message : e) + "。請把這行字截圖給 Claude。");
+    }
+  };
+  if (typeof VOICES === "undefined") report("人聲檔案沒有載入（voices.js），提醒人聲不會播放。請把這行字截圖給 Claude。");
+  $("stop").onclick = async () => {
+    if (ctx && ctx.state === "suspended") await ctx.resume();
+    teardown(); setState("idle");
+  };
+
+  function setState(s) {
+    state = s;
+    const label = { idle: "準備", running: "跑步中", paused: "暫停", done: "完成" }[s];
+    $("state").textContent = label; $("state").dataset.s = s;
+    $("go").textContent = s === "running" ? "暫停" : s === "paused" ? "繼續" : "開始";
+    $("stop").disabled = !(s === "running" || s === "paused");
+    $("settings").disabled = s === "running" || s === "paused";
+    if (navigator.mediaSession) navigator.mediaSession.playbackState = s === "running" ? "playing" : s === "paused" ? "paused" : "none";
+    if (s === "idle") showIdle();
+  }
+  function fmt(sec) { sec = Math.max(0, Math.floor(sec)); const m = Math.floor(sec / 60), s = sec % 60; return m + ":" + String(s).padStart(2, "0"); }
+  function showIdle() {
+    $("remain").textContent = fmt(cfg.total * 60);
+    $("elapsed").textContent = "0:00";
+    $("next").innerHTML = cfg.interval ? cfg.interval + "<small>分</small>" : "—";
+    $("steps").textContent = "0";
+  }
+
+  // keep the tab registered as media playback so Chrome keeps it alive with the screen off
+  function silentWav() {
+    const sr = 8000, n = sr / 2, b = new Uint8Array(44 + n), v = new DataView(b.buffer);
+    const w = (o, s) => [...s].forEach((c, i) => b[o + i] = c.charCodeAt(0));
+    w(0, "RIFF"); v.setUint32(4, 36 + n, true); w(8, "WAVEfmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, sr, true); v.setUint32(28, sr, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); w(36, "data"); v.setUint32(40, n, true);
+    b.fill(128, 44);
+    let s = ""; b.forEach(x => s += String.fromCharCode(x));
+    return "data:audio/wav;base64," + btoa(s);
+  }
+  function startKeepAlive() {
+    try {
+      if (!keepAlive) { keepAlive = new Audio(silentWav()); keepAlive.loop = true; }
+      keepAlive.play().catch(() => {});
+    } catch (e) {}
+  }
+  function stopKeepAlive() { try { keepAlive && keepAlive.pause(); } catch (e) {} }
+  function mediaSession() {
+    if (!("mediaSession" in navigator)) return;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: "超慢跑快樂 Zone2", artist: cfg.bpm + " BPM · " + cfg.total + " 分鐘" });
+      navigator.mediaSession.setActionHandler("play", () => { if (state === "paused") togglePause(); });
+      navigator.mediaSession.setActionHandler("pause", () => { if (state === "running") togglePause(); });
+      navigator.mediaSession.setActionHandler("stop", () => $("stop").click());
+    } catch (e) {}
+  }
+  async function requestWake() { try { wakeLock = await navigator.wakeLock.request("screen"); } catch (e) { wakeLock = null; } }
+  function releaseWake() { try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null; }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && cfg.wake && state === "running") requestWake(); });
+
+  // ---------- previews ----------
+  async function preview(fn) { ensureCtx(); if (ctx.state === "suspended" && state !== "paused") await ctx.resume(); fn(ctx.currentTime + .05); }
+  $("pvClick").onclick = () => preview(t => { const b = 60 / cfg.bpm; for (let i = 0; i < 4; i++) play(clickBufs[cfg.sound], t + i * b, clickVolG); });
+  $("pvVoice").onclick = () => preview(async t => { const b = await voice("v" + (cfg.interval || 5)); b && play(b, ctx.currentTime + .05, voiceVolG); });
+  $("pvEnd").onclick = () => preview(async t => { play(chimeBuf, t, voiceVolG); const b = await voice("end"); b && play(b, t + 2.4, voiceVolG); });
+  $("pvStart").onclick = () => preview(async t => { const b = await voice("start"); b && play(b, ctx.currentTime + .05, voiceVolG); });
+
+  // ---------- clock drawing + animation ----------
+  const ticks = $("ticks");
+  for (let h = 1; h <= 12; h++) {
+    const a = h / 12 * 2 * Math.PI, x = 150 + Math.sin(a) * 19, y = 190 - Math.cos(a) * 19 + 2.5;
+    const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    t.setAttribute("x", x.toFixed(1)); t.setAttribute("y", y.toFixed(1)); t.textContent = h;
+    if (h % 3) { t.setAttribute("font-size", "4.6"); t.setAttribute("font-weight", "400"); }
+    ticks.appendChild(t);
+  }
+  const planks = $("planks");
+  { let x = 0, i = 0; const ws = [34, 27, 38, 30, 24, 36, 31, 28, 35, 33];
+    while (x < 300) { const w = ws[i % ws.length];
+      const r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      r.setAttribute("x", x); r.setAttribute("y", 0); r.setAttribute("width", w); r.setAttribute("height", 360); r.setAttribute("fill", i % 2 ? "url(#plankB)" : "url(#plankA)");
+      planks.appendChild(r);
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      g.setAttribute("x", x + w - 1.6); g.setAttribute("y", 0); g.setAttribute("width", 1.6); g.setAttribute("height", 360); g.setAttribute("fill", "#2e170a");
+      planks.appendChild(g); x += w; i++; } }
+
+  const d = new Date(); $("today").textContent = d.getFullYear() + "." + String(d.getMonth() + 1).padStart(2, "0") + "." + String(d.getDate()).padStart(2, "0");
+
+  const tail = $("tail"), pupils = $("pupils"), hourH = $("hourH" + "and"), minH = $("minHand");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const amp = reduce ? 5 : 16;
+  let lastHand = -1;
+  function frame() {
+    let beats;
+    if (run && ctx) {
+      const el = ctx.currentTime - run.t0;
+      beats = Math.max(0, el) * run.bpm / 60;
+      if (el >= 0 && el < run.total) {
+        $("remain").textContent = fmt(Math.ceil(run.total - el) - (el > 0 ? 0 : 0));
+        $("elapsed").textContent = fmt(el);
+        $("steps").textContent = Math.floor(beats) + 1;
+        if (run.interval) { const nx = (Math.floor(el / 60 / run.interval) + 1) * run.interval; $("next").innerHTML = nx * 60 < run.total ? nx + "<small>分</small>" : "—"; }
+        else $("next").textContent = "—";
+      } else if (el >= run.total) {
+        $("remain").textContent = "0:00"; $("elapsed").textContent = fmt(run.total); $("next").textContent = "—";
+        if (state !== "done") { setState("done"); try { navigator.vibrate && navigator.vibrate([300, 150, 300, 150, 600]); } catch (e) {} }
+        if (ctx.currentTime > run.finishAt) { const keep = run; teardown(); setState("done"); $("remain").textContent = "0:00"; $("elapsed").textContent = fmt(keep.total); $("steps").textContent = Math.floor(keep.total * keep.bpm / 60); }
+        beats = 0;
+      }
+      if (state === "done") beats = 0;
+    } else {
+      beats = performance.now() / 1000 * cfg.bpm / 60;
+    }
+    const swing = Math.cos(Math.PI * beats);          // extreme on every beat
+    const still = state === "done" || state === "paused" && false;
+    const ang = still ? 0 : amp * swing;
+    tail.setAttribute("transform", `rotate(${ang.toFixed(2)} 150 246)`);
+    pupils.setAttribute("transform", `translate(${(-ang / amp * 5.5).toFixed(2)} 0)`);
+    const now = new Date(), mins = now.getHours() * 60 + now.getMinutes();
+    if (mins !== lastHand) {
+      lastHand = mins;
+      hourH.setAttribute("transform", `rotate(${((mins % 720) / 2).toFixed(1)} 150 190)`);
+      minH.setAttribute("transform", `rotate(${now.getMinutes() * 6} 150 190)`);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  renderCfg(); setState("idle"); requestAnimationFrame(frame);
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+</script>
+</body>
+</html>

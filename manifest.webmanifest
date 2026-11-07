@@ -1,0 +1,16 @@
+{
+  "name": "超慢跑快樂Zone2",
+  "short_name": "超慢跑",
+  "description": "180 BPM 超慢跑節拍器與計時器",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2c8bd",
+  "theme_color": "#f2c8bd",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
